@@ -14,7 +14,7 @@ jobs:
       - run:
           name: run ansible
           command: |
-            ansible-playbook -i inventory.txt main.yml
+            ansible-playbook -i inventory.txt -vvv main.yml
 workflows:
   default:
     jobs:
