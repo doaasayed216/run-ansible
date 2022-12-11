@@ -16,6 +16,5 @@
     echo "TYPEORM_DATABASE="{{ lookup('env', 'TYPEORM_DATABASE')}}"" >> .env
 
 - name: start app
-  become: true 
   shell: |
     pm2 start npm -- start
