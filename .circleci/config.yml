@@ -9,7 +9,10 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update python3
+            apk add --update npm
+            apk add --update nodejs
             apk add --update curl
+            pip3 install awscli
       - run:
           name: Backend smoke test.
           command: |
