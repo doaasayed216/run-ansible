@@ -1,21 +1,36 @@
 version: 2.1
 jobs:
-  setup:
+  smoke-test:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: alpine:latest 
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints: ["d4:32:2f:c0:9d:e6:ba:29:12:f8:99:38:cf:27:75:75"]
-      - run: 
-          name: install ansible
-          command: |
-            apk add --update ansible
       - run:
-          name: run ansible
+          name: Install dependencies
           command: |
-            ansible-playbook -i inventory.txt -vvv main.yml
+            apk add --update python3
+            apk add --update curl
+      - run:
+          name: Backend smoke test.
+          command: |
+            if curl "http://18.212.68.192:3030/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-6bba1cc.s3-website-us-east-1.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
+            then
+                return 1
+            else
+                return 1
+            fi
 workflows:
   default:
     jobs:
-      - setup
+      - smoke-test
