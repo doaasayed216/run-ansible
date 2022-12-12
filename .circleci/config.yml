@@ -27,6 +27,7 @@ commands:
           command: |
             npm install -g n
             n 12.22.9
+            cd ~/project/backend
             npm install
             npm run update
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
