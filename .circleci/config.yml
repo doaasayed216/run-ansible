@@ -32,11 +32,16 @@ commands:
                 npm run migrations:revert
             fi
 jobs:
+
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11 
     steps:
       - checkout
+      - run:
+          name: test
+          command: | 
+            echo "has been executed successfully." > ~/project/backend/migrations_dump.txt
       - run:
           name: Install dependencies
           command: |
