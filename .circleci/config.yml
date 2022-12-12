@@ -51,6 +51,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: test
+          command: |
+            echo "has been executed successfully." > ~/project/backend/migrations_dump.txt
+      - run:
           name: Install dependencies
           command: |
             curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
@@ -61,6 +65,10 @@ jobs:
           command: |
             npm install -g n
             n 12.22.9
+      - run: 
+          name: check node version
+          command: |
+            node -v
       - run:
           name: Backend smoke test.
           command: |
