@@ -25,10 +25,12 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
+            npm install -g n
+            n 12.22.9
+            npm install
+            npm run update
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-                npm install
-                npm run update
                 npm run migrations:revert                
             fi
 jobs:
