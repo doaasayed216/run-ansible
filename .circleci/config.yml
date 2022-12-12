@@ -55,6 +55,7 @@ jobs:
           command: |
             curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
             yum -y install nodejs npm 
+            yum -y tar gzip
       - run:
           name: update node version
           command: |
