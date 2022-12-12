@@ -76,11 +76,6 @@ jobs:
             apk add --update curl
             pip install awscli
       - run:
-          name: update node version
-          command: |
-            npm install -g n
-            n 12.22.9
-      - run:
           name: Backend smoke test.
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
@@ -111,4 +106,6 @@ jobs:
 workflows:
   default:
     jobs:
-      - smoke-test
+      - run-migrations
+      - smoke-test:
+          requires: [run-migrations]
