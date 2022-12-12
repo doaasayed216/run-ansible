@@ -173,6 +173,6 @@ workflows:
       - deploy-frontend:
           requires: [deploy-infrastructure]
       - cloudfront-update:
-          requires: [smoke-test]
+          requires: [deploy-frontend]
       - cleanup:
           requires: [cloudfront-update]
