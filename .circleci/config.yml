@@ -90,7 +90,7 @@ jobs:
             else
                 return 1
             fi
-      - destron-environment:
+      - destroy-environment:
           workflow_id: '3c8c2c9'
       - revert-migrations:
           workflow_id: '3c8c2c9'
