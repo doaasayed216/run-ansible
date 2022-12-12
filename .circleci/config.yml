@@ -25,90 +25,55 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            echo << parameters.workflow_id >>
-            if (( $(curl --insecure  https://kvdb.io/8tMADQzHuts6vnHp3XzRuK/migration_<< parameters.workflow_id >>) == 1 ));
+            SUCCESS=$(curl --insecure  https://kvdb.io/8tMADQzHuts6vnHp3XzRuK/migration_<< parameters.workflow_id >>)
+            if (( $SUCCESS == 1 ));
             then
                 cd ~/project/backend
                 npm install
                 npm run migration:revert
             fi
 jobs:
-  deploy-infrastructure:
+  smoke-test:
     docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Install tar utality
-          command: |
-            yum install -y tar gzip
-      - run:
-          name: Ensure back-end infrastructure exists
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      - run:
-          name: Ensure front-end infrastructure exist
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      - run:
-          name: Add back-end ip to ansible inventory
-          command: |
-            aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text >> .circleci/ansible/inventory.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-  
-  
-  deploy-frontend:
-    docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11 
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
-            yum -y install nodejs npm
-            yum -y install tar gzip
+            apk add --update npm
+            apk add --update nodejs
+            apk add --update curl
+            pip install awscli
       - run:
-          name: Get backend url
+          name: Backend smoke test.
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
       - run:
-          name: Deploy frontend objects
+          name: Frontend smoke test.
           command: |
-            cd frontend
-            npm install
-            npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive 
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
+            then
+                return 0
+            else
+                return 1
+            fi
       - revert-migrations:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: '3c8c2c9'
   
 workflows:
   default:
     jobs:
-      - deploy-infrastructure
-      - deploy-frontend:
-          requires: [deploy-infrastructure]
+      - smoke-test
