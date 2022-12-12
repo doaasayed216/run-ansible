@@ -53,9 +53,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum -y tar gzip
             curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
             yum -y install nodejs npm 
+            yum -y install tar gzip
       - run:
           name: update node version
           command: |
