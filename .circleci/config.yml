@@ -27,6 +27,7 @@ commands:
           command: |
             echo << parameters.workflow_id >>
             SUCCESS=$(curl --insecure  https://kvdb.io/8tMADQzHuts6vnHp3XzRuK/migration_<< parameters.workflow_id >>)
+            echo $SUCCESS
             if (( $SUCCESS == 1 ));
             then
                 cd ~/project/backend
